@@ -1,7 +1,7 @@
 package com.zhmenko.deeplay;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
+import com.zhmenko.deeplay.config.ConfigurationFileParser;
+import com.zhmenko.deeplay.config.JsonConfigurationFileParser;
 
 import java.io.File;
 import java.util.*;
@@ -12,7 +12,8 @@ public class Solution {
 
     public static int getResult(String cells, String entityType, File propertiesFile) {
         // загружаем конфиг из файла
-        Map<String, Map<String, Integer>> entitiesProperties = parseFile(propertiesFile);
+        ConfigurationFileParser fileParser = new JsonConfigurationFileParser();
+        Map<String, Map<String, Integer>> entitiesProperties = fileParser.parseFile(propertiesFile);
         Map<String, Integer> entityProperties = Objects.requireNonNull(entitiesProperties.get(entityType),
                 String.format("Не найдено существа с именем %s", entityType));
         if (cells.length() != rows * columns)
@@ -23,10 +24,12 @@ public class Solution {
             );
 
         List<Node> nodeList = buildNodes(cells, entityProperties);
-        //                                          стоимость перемещения по начальной клетке не считается, поэтому "зануляем" её
-        //                                                                        |
-        //                                                                        v
-        return dfs(nodeList.get(0), nodeList.get(nodeList.size() - 1), -nodeList.get(0).getVal(), new HashSet<>(), Integer.MAX_VALUE);
+        Node start = nodeList.get(0);
+        Node end = nodeList.get(nodeList.size()-1);
+        //стоимость перемещения по начальной клетке не считается, поэтому "зануляем" её
+        //                            |
+        //                            v
+        return dfs(start, end, -start.getVal(), new HashSet<>(), Integer.MAX_VALUE);
     }
 
     private static int dfs(Node cur, Node target, int curPathCost, Set<Node> visited, int minPathCost) {
@@ -76,16 +79,5 @@ public class Solution {
             nodeList.get(i).setNeighbors(cellNeighbors);
         }
         return nodeList;
-    }
-
-    private static Map<String, Map<String, Integer>> parseFile(File configFile) {
-        Map<String, Map<String, Integer>> config;
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            config = (Map<String, Map<String, Integer>>) mapper.readValue(configFile, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeJsonMappingException("Не получилось считать свойства из файла!");
-        }
-        return config;
     }
 }

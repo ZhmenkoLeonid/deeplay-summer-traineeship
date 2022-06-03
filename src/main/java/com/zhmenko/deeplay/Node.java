@@ -11,16 +11,8 @@ import java.util.List;
 public class Node {
     private int val;
     private List<Node> neighbors;
-    public Node() {
-        this.val = 0;
-        this.neighbors = new ArrayList<Node>();
-    }
     public Node(int val) {
         this.val = val;
-        neighbors = new ArrayList<Node>();
-    }
-    public Node(int val, ArrayList<Node> neighbors) {
-        this.val = val;
-        this.neighbors = neighbors;
+        neighbors = new ArrayList<>();
     }
 }
