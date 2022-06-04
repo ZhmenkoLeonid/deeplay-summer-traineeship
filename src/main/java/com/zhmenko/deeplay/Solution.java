@@ -10,9 +10,11 @@ public class Solution {
     private final static int rows = 4;
     private final static int columns = 4;
 
+    private static ConfigurationFileParser fileParser;
+
     public static int getResult(String cells, String entityType, File propertiesFile) {
+        if (fileParser == null) fileParser = new JsonConfigurationFileParser();
         // загружаем конфиг из файла
-        ConfigurationFileParser fileParser = new JsonConfigurationFileParser();
         Map<String, Map<String, Integer>> entitiesProperties = fileParser.parseFile(propertiesFile);
         Map<String, Integer> entityProperties = Objects.requireNonNull(entitiesProperties.get(entityType),
                 String.format("Не найдено существа с именем %s", entityType));
@@ -68,14 +70,18 @@ public class Solution {
         // ищем соседей нод
         for (int i = 0; i < nodeList.size(); i++) {
             List<Node> cellNeighbors = new ArrayList<>();
-            if ((i - 1) % rows != rows - 1 && i - 1 >= 0) {
+            // слева
+            if ((i - 1) % columns != columns - 1 && i - 1 >= 0) {
                 cellNeighbors.add(nodeList.get(i - 1));
             }
-            if (i - rows >= 0) cellNeighbors.add(nodeList.get(i - rows));
-            if ((i + 1) % rows != 0 && i + 1 < capacity) {
+            // справа
+            if ((i + 1) % columns != 0 && i + 1 < capacity) {
                 cellNeighbors.add(nodeList.get(i + 1));
             }
-            if (i + rows < capacity) cellNeighbors.add(nodeList.get(i + rows));
+            // сверху
+            if (i - columns >= 0) cellNeighbors.add(nodeList.get(i - columns));
+            // cнизу
+            if (i + columns < capacity) cellNeighbors.add(nodeList.get(i + columns));
             nodeList.get(i).setNeighbors(cellNeighbors);
         }
         return nodeList;
